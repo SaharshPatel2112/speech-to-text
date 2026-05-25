@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
-import axios from "axios";
+import API from "../api";
 
-function AudioRecorder({ setTranscription, setLoading, setError }) {
+function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
   const [recording, setRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -26,11 +26,9 @@ function AudioRecorder({ setTranscription, setLoading, setError }) {
 
       setLoading(true);
       try {
-        const res = await axios.post(
-          "http://localhost:5000/api/upload",
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } },
-        );
+        const res = await API.post("/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         setTranscription(res.data.transcription);
       } catch (err) {
         setError("Recording transcription failed. Please try again.");
@@ -53,13 +51,20 @@ function AudioRecorder({ setTranscription, setLoading, setError }) {
       <h2 className="text-lg font-semibold mb-4">Record Audio</h2>
       <button
         onClick={recording ? stopRecording : startRecording}
+        disabled={loading}
         className={`w-full py-3 rounded-xl font-semibold transition ${
-          recording
-            ? "bg-red-600 hover:bg-red-700"
-            : "bg-blue-600 hover:bg-blue-700"
+          loading
+            ? "bg-gray-700 cursor-not-allowed opacity-50"
+            : recording
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-blue-600 hover:bg-blue-700"
         }`}
       >
-        {recording ? "Stop Recording" : "Start Recording"}
+        {loading
+          ? "Processing..."
+          : recording
+            ? "Stop Recording"
+            : "Start Recording"}
       </button>
       {recording && (
         <p className="text-center text-red-400 text-sm mt-3 animate-pulse">

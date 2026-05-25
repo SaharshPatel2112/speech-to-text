@@ -23,11 +23,13 @@ function App() {
             setTranscription={setTranscription}
             setLoading={setLoading}
             setError={setError}
+            loading={loading}
           />
           <AudioRecorder
             setTranscription={setTranscription}
             setLoading={setLoading}
             setError={setError}
+            loading={loading}
           />
           <TranscriptionResult
             transcription={transcription}

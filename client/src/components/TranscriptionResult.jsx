@@ -8,7 +8,10 @@ function TranscriptionResult({ transcription, loading, error }) {
       <h2 className="text-lg font-semibold mb-4">Transcription</h2>
 
       {loading && (
-        <p className="text-blue-400 animate-pulse">Transcribing audio...</p>
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-blue-400">Transcribing audio...</p>
+        </div>
       )}
 
       {error && <p className="text-red-400">{error}</p>}
