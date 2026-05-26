@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import FileUpload from "./components/FileUpload";
 import AudioRecorder from "./components/AudioRecorder";
 import TranscriptionResult from "./components/TranscriptionResult";
+import TranscriptionHistory from "./components/TranscriptionHistory";
 
 function App() {
   const [transcription, setTranscription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleTranscriptionDone = (text) => {
+    setTranscription(text);
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -20,13 +27,13 @@ function App() {
 
         <div className="flex flex-col gap-6">
           <FileUpload
-            setTranscription={setTranscription}
+            setTranscription={handleTranscriptionDone}
             setLoading={setLoading}
             setError={setError}
             loading={loading}
           />
           <AudioRecorder
-            setTranscription={setTranscription}
+            setTranscription={handleTranscriptionDone}
             setLoading={setLoading}
             setError={setError}
             loading={loading}
@@ -37,6 +44,8 @@ function App() {
             error={error}
           />
         </div>
+
+        <TranscriptionHistory key={refreshKey} />
       </div>
     </div>
   );

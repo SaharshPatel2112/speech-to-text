@@ -3,6 +3,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const deepgram = require("../deepgram");
+const supabase = require("../supabase");
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -56,6 +57,15 @@ router.post("/upload", upload.single("audio"), async (req, res) => {
 
     fs.unlinkSync(filePath);
 
+    // Save to Supabase
+    const { error: dbError } = await supabase
+      .from("transcriptions")
+      .insert([{ filename: req.file.originalname, transcription }]);
+
+    if (dbError) {
+      console.error("Supabase insert error:", dbError.message);
+    }
+
     res.json({
       message: "Transcription successful",
       filename: req.file.originalname,
@@ -66,6 +76,20 @@ router.post("/upload", upload.single("audio"), async (req, res) => {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     res.status(500).json({ error: "Transcription failed: " + err.message });
   }
+});
+
+// Get all transcriptions
+router.get("/transcriptions", async (req, res) => {
+  const { data, error } = await supabase
+    .from("transcriptions")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json(data);
 });
 
 module.exports = router;
