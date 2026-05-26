@@ -29,22 +29,41 @@ function FileUpload({ setTranscription, setLoading, setError, loading }) {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6">
-      <h2 className="text-lg font-semibold mb-4">Upload Audio File</h2>
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-600 transition">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+        <h2 className="text-base font-semibold text-gray-200">
+          Upload Audio File
+        </h2>
+      </div>
       <label
-        className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl transition ${
+        className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl transition ${
           loading
             ? "border-gray-700 cursor-not-allowed opacity-50"
-            : "border-gray-600 cursor-pointer hover:border-blue-500"
+            : "border-gray-700 cursor-pointer hover:border-blue-500 hover:bg-gray-800"
         }`}
       >
-        <span className="text-gray-400 text-sm">
+        <svg
+          className="w-8 h-8 text-gray-500 mb-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+          />
+        </svg>
+        <span className="text-gray-400 text-sm text-center px-4">
           {loading
             ? "Processing..."
             : fileName
               ? fileName
-              : "Click to upload .mp3, .wav, .webm"}
+              : "Click to upload .mp3, .wav, .webm, .ogg"}
         </span>
+        <span className="text-gray-600 text-xs mt-1">Audio files only</span>
         <input
           type="file"
           accept="audio/*"

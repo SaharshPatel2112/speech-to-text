@@ -3,13 +3,16 @@ import API from "../api";
 
 function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
   const [recording, setRecording] = useState(false);
+  const [seconds, setSeconds] = useState(0);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
+  const timerRef = useRef(null);
 
   const startRecording = async () => {
     setError("");
     setTranscription("");
     chunksRef.current = [];
+    setSeconds(0);
 
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
@@ -20,6 +23,7 @@ function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
     };
 
     mediaRecorder.onstop = async () => {
+      clearInterval(timerRef.current);
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
       const formData = new FormData();
       formData.append("audio", blob, "recording.webm");
@@ -39,6 +43,10 @@ function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
 
     mediaRecorder.start();
     setRecording(true);
+
+    timerRef.current = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
   };
 
   const stopRecording = () => {
@@ -46,18 +54,28 @@ function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
     setRecording(false);
   };
 
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
+
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6">
-      <h2 className="text-lg font-semibold mb-4">Record Audio</h2>
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-600 transition">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+        <h2 className="text-base font-semibold text-gray-200">Record Audio</h2>
+      </div>
+
       <button
         onClick={recording ? stopRecording : startRecording}
         disabled={loading}
-        className={`w-full py-3 rounded-xl font-semibold transition ${
+        className={`w-full py-3 rounded-xl font-semibold transition-all ${
           loading
-            ? "bg-gray-700 cursor-not-allowed opacity-50"
+            ? "bg-gray-800 text-gray-500 cursor-not-allowed"
             : recording
-              ? "bg-red-600 hover:bg-red-700"
-              : "bg-blue-600 hover:bg-blue-700"
+              ? "bg-red-600 hover:bg-red-700 text-white"
+              : "bg-blue-600 hover:bg-blue-700 text-white"
         }`}
       >
         {loading
@@ -66,10 +84,14 @@ function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
             ? "Stop Recording"
             : "Start Recording"}
       </button>
+
       {recording && (
-        <p className="text-center text-red-400 text-sm mt-3 animate-pulse">
-          Recording in progress...
-        </p>
+        <div className="flex items-center justify-center gap-2 mt-3">
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+          <p className="text-red-400 text-sm">
+            Recording — {formatTime(seconds)}
+          </p>
+        </div>
       )}
     </div>
   );
