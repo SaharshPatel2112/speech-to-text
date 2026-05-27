@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ErrorMessage from "./ErrorMessage";
 
 function TranscriptionResult({ transcription, loading, error }) {
   const [copied, setCopied] = useState(false);
@@ -23,11 +24,7 @@ function TranscriptionResult({ transcription, loading, error }) {
         </div>
       )}
 
-      {error && (
-        <div className="bg-red-950 border border-red-800 rounded-xl px-4 py-3">
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
+      <ErrorMessage message={error} />
 
       {!loading && !error && transcription && (
         <>

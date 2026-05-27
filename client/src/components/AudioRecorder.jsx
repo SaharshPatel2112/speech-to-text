@@ -14,39 +14,52 @@ function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
     chunksRef.current = [];
     setSeconds(0);
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    mediaRecorderRef.current = mediaRecorder;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
 
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
-    };
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
 
-    mediaRecorder.onstop = async () => {
-      clearInterval(timerRef.current);
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      const formData = new FormData();
-      formData.append("audio", blob, "recording.webm");
+      mediaRecorder.onstop = async () => {
+        clearInterval(timerRef.current);
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("audio", blob, "recording.webm");
 
-      setLoading(true);
-      try {
-        const res = await API.post("/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        setTranscription(res.data.transcription);
-      } catch (err) {
-        setError("Recording transcription failed. Please try again.");
-      } finally {
-        setLoading(false);
+        setLoading(true);
+        try {
+          const res = await API.post("/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          setTranscription(res.data.transcription);
+        } catch (err) {
+          const message =
+            err.response?.data?.error ||
+            "Recording transcription failed. Please try again.";
+          setError(message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      mediaRecorder.start();
+      setRecording(true);
+
+      timerRef.current = setInterval(() => {
+        setSeconds((prev) => prev + 1);
+      }, 1000);
+    } catch (err) {
+      if (err.name === "NotAllowedError") {
+        setError(
+          "Microphone access denied. Please allow microphone permission.",
+        );
+      } else {
+        setError("Could not access microphone. Please check your device.");
       }
-    };
-
-    mediaRecorder.start();
-    setRecording(true);
-
-    timerRef.current = setInterval(() => {
-      setSeconds((prev) => prev + 1);
-    }, 1000);
+    }
   };
 
   const stopRecording = () => {

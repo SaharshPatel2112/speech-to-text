@@ -6,6 +6,8 @@ const deepgram = require("../deepgram");
 const supabase = require("../supabase");
 const router = express.Router();
 
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -17,6 +19,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
+  limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       "audio/mpeg",
@@ -28,14 +31,35 @@ const upload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Invalid file type. Only audio files are allowed."));
+      cb(new Error("INVALID_FILE_TYPE"));
     }
   },
 });
 
-router.post("/upload", upload.single("audio"), async (req, res) => {
+// Multer error handler middleware
+const handleUpload = (req, res, next) => {
+  upload.single("audio")(req, res, (err) => {
+    if (err) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res
+          .status(400)
+          .json({ error: "File too large. Maximum size is 25MB." });
+      }
+      if (err.message === "INVALID_FILE_TYPE") {
+        return res.status(400).json({
+          error:
+            "Invalid file type. Only mp3, wav, webm, ogg and mp4 are allowed.",
+        });
+      }
+      return res.status(400).json({ error: err.message });
+    }
+    next();
+  });
+};
+
+router.post("/upload", handleUpload, async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
+    return res.status(400).json({ error: "No file uploaded." });
   }
 
   const filePath = path.join(__dirname, "../uploads", req.file.filename);
@@ -52,12 +76,22 @@ router.post("/upload", upload.single("audio"), async (req, res) => {
       },
     );
 
+    if (!response?.results?.channels?.[0]?.alternatives?.[0]) {
+      throw new Error("Deepgram returned an empty response.");
+    }
+
     const transcription =
       response.results.channels[0].alternatives[0].transcript;
 
+    if (!transcription || transcription.trim() === "") {
+      fs.unlinkSync(filePath);
+      return res.status(422).json({
+        error: "No speech detected in the audio. Please try again.",
+      });
+    }
+
     fs.unlinkSync(filePath);
 
-    // Save to Supabase
     const { error: dbError } = await supabase
       .from("transcriptions")
       .insert([{ filename: req.file.originalname, transcription }]);
@@ -74,11 +108,22 @@ router.post("/upload", upload.single("audio"), async (req, res) => {
   } catch (err) {
     console.error("Transcription error:", err.message);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    res.status(500).json({ error: "Transcription failed: " + err.message });
+
+    if (err.message.includes("ENOENT")) {
+      return res.status(500).json({ error: "File processing failed." });
+    }
+    if (err.message.includes("fetch") || err.message.includes("network")) {
+      return res
+        .status(503)
+        .json({
+          error: "Could not reach Deepgram. Check your internet connection.",
+        });
+    }
+
+    res.status(500).json({ error: "Transcription failed. Please try again." });
   }
 });
 
-// Get all transcriptions
 router.get("/transcriptions", async (req, res) => {
   const { data, error } = await supabase
     .from("transcriptions")
@@ -86,7 +131,7 @@ router.get("/transcriptions", async (req, res) => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: "Failed to fetch transcriptions." });
   }
 
   res.json(data);

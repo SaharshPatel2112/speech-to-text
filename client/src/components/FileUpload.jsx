@@ -1,15 +1,41 @@
 import { useState } from "react";
 import API from "../api";
+import ErrorMessage from "./ErrorMessage";
 
 function FileUpload({ setTranscription, setLoading, setError, loading }) {
   const [fileName, setFileName] = useState("");
+  const [localError, setLocalError] = useState("");
+
+  const ALLOWED_TYPES = [
+    "audio/mpeg",
+    "audio/wav",
+    "audio/mp4",
+    "audio/webm",
+    "audio/ogg",
+  ];
+  const MAX_SIZE_MB = 25;
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setFileName(file.name);
+    setLocalError("");
     setError("");
+
+    // Client side validation
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setLocalError(
+        "Invalid file type. Only mp3, wav, webm, ogg and mp4 are allowed.",
+      );
+      return;
+    }
+
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setLocalError(`File too large. Maximum size is ${MAX_SIZE_MB}MB.`);
+      return;
+    }
+
+    setFileName(file.name);
     setLoading(true);
     setTranscription("");
 
@@ -22,7 +48,9 @@ function FileUpload({ setTranscription, setLoading, setError, loading }) {
       });
       setTranscription(res.data.transcription);
     } catch (err) {
-      setError("Upload failed. Please try again.");
+      const message =
+        err.response?.data?.error || "Upload failed. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -36,6 +64,7 @@ function FileUpload({ setTranscription, setLoading, setError, loading }) {
           Upload Audio File
         </h2>
       </div>
+
       <label
         className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-xl transition ${
           loading
@@ -63,7 +92,7 @@ function FileUpload({ setTranscription, setLoading, setError, loading }) {
               ? fileName
               : "Click to upload .mp3, .wav, .webm, .ogg"}
         </span>
-        <span className="text-gray-600 text-xs mt-1">Audio files only</span>
+        <span className="text-gray-600 text-xs mt-1">Max size: 25MB</span>
         <input
           type="file"
           accept="audio/*"
@@ -72,6 +101,10 @@ function FileUpload({ setTranscription, setLoading, setError, loading }) {
           disabled={loading}
         />
       </label>
+
+      <div className="mt-3">
+        <ErrorMessage message={localError} />
+      </div>
     </div>
   );
 }
