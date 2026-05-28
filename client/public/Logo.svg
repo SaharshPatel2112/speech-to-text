@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0c58a6"/>
+      <stop offset="50%" stop-color="#148bb0"/>
+      <stop offset="100%" stop-color="#1dbda3"/>
+    </linearGradient>
+    
+    <style>
+      .white-stroke { fill: none; stroke: #ffffff; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+      .cyan-stroke { fill: none; stroke: #a3f3eb; stroke-width: 10; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <circle cx="250" cy="250" r="230" fill="url(#bgGradient)"/>
+
+  <path d="M 250 40 A 210 210 0 1 0 430 160" class="white-stroke" stroke-width="12"/>
+  <path d="M 400 395 A 210 210 0 0 0 455 280" class="white-stroke" stroke-width="12"/>
+
+  <g fill="#ffffff">
+    <rect x="120" y="170" width="40" height="70" rx="20"/>
+    <rect x="110" y="190" width="60" height="6" rx="3" fill="#1175ab"/>
+    <rect x="110" y="205" width="60" height="6" rx="3" fill="#1175ab"/>
+    <rect x="110" y="220" width="60" height="6" rx="3" fill="#1175ab"/>
+    <path d="M 105 210 v 30 a 35 35 0 0 0 70 0 v -30" class="white-stroke"/>
+    <line x1="140" y1="280" x2="140" y2="310" stroke="#ffffff" stroke-width="10"/>
+    <line x1="110" y1="310" x2="170" y2="310" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g class="cyan-stroke">
+    <path d="M 195 200 A 50 50 0 0 1 195 280"/>
+    <path d="M 215 180 A 80 80 0 0 1 215 300"/>
+    <path d="M 235 160 A 110 110 0 0 1 235 320"/>
+  </g>
+
+  <path d="M 255 225 h 30 v -20 l 35 35 l -35 35 v -20 h -30 z" class="white-stroke" stroke-width="8" fill="url(#bgGradient)"/>
+
+  <g class="white-stroke">
+    <path d="M 315 130 h 50 l 40 40 v 150 h -90 z" fill="url(#bgGradient)"/>
+    <path d="M 365 130 v 40 h 40" fill="none"/>
+    
+    <line x1="335" y1="170" x2="355" y2="170"/>
+    <line x1="335" y1="195" x2="385" y2="195"/>
+    <line x1="335" y1="220" x2="385" y2="220"/>
+    <line x1="335" y1="245" x2="365" y2="245"/>
+    <line x1="335" y1="270" x2="385" y2="270"/>
+    <line x1="335" y1="295" x2="375" y2="295"/>
+  </g>
+
+  <g transform="translate(365, 275) rotate(-35)" class="white-stroke">
+    <path d="M 0 0 L 20 40 L 40 0 Z" fill="url(#bgGradient)"/>
+    <line x1="20" y1="40" x2="20" y2="15"/>
+  </g>
+</svg>

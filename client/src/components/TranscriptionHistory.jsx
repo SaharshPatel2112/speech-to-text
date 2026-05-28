@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import API from "../api";
+import { useAuth } from "@clerk/clerk-react";
+import API, { setAuthToken } from "../api";
 
 function TranscriptionHistory() {
+  const { getToken } = useAuth();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
   const fetchHistory = async () => {
     try {
+      const token = await getToken();
+      setAuthToken(token);
       const res = await API.get("/transcriptions");
       setHistory(res.data);
     } catch (err) {

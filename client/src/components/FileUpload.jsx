@@ -1,8 +1,10 @@
 import { useState } from "react";
-import API from "../api";
+import API, { setAuthToken } from "../api";
 import ErrorMessage from "./ErrorMessage";
+import { useAuth } from "@clerk/clerk-react";
 
 function FileUpload({ setTranscription, setLoading, setError, loading }) {
+  const { getToken } = useAuth();
   const [fileName, setFileName] = useState("");
   const [localError, setLocalError] = useState("");
 
@@ -22,7 +24,6 @@ function FileUpload({ setTranscription, setLoading, setError, loading }) {
     setLocalError("");
     setError("");
 
-    // Client side validation
     if (!ALLOWED_TYPES.includes(file.type)) {
       setLocalError(
         "Invalid file type. Only mp3, wav, webm, ogg and mp4 are allowed.",
@@ -38,6 +39,10 @@ function FileUpload({ setTranscription, setLoading, setError, loading }) {
     setFileName(file.name);
     setLoading(true);
     setTranscription("");
+
+    // Refresh token before request
+    const token = await getToken();
+    setAuthToken(token);
 
     const formData = new FormData();
     formData.append("audio", file);

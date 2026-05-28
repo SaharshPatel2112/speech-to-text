@@ -5,6 +5,7 @@ const path = require("path");
 const deepgram = require("../deepgram");
 const supabase = require("../supabase");
 const router = express.Router();
+const requireAuth = require("../middleware/requireAuth");
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
 
@@ -57,7 +58,7 @@ const handleUpload = (req, res, next) => {
   });
 };
 
-router.post("/upload", handleUpload, async (req, res) => {
+router.post("/upload", requireAuth, handleUpload, async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded." });
   }
@@ -94,7 +95,9 @@ router.post("/upload", handleUpload, async (req, res) => {
 
     const { error: dbError } = await supabase
       .from("transcriptions")
-      .insert([{ filename: req.file.originalname, transcription }]);
+      .insert([
+        { filename: req.file.originalname, transcription, user_id: req.userId },
+      ]);
 
     if (dbError) {
       console.error("Supabase insert error:", dbError.message);
@@ -113,21 +116,20 @@ router.post("/upload", handleUpload, async (req, res) => {
       return res.status(500).json({ error: "File processing failed." });
     }
     if (err.message.includes("fetch") || err.message.includes("network")) {
-      return res
-        .status(503)
-        .json({
-          error: "Could not reach Deepgram. Check your internet connection.",
-        });
+      return res.status(503).json({
+        error: "Could not reach Deepgram. Check your internet connection.",
+      });
     }
 
     res.status(500).json({ error: "Transcription failed. Please try again." });
   }
 });
 
-router.get("/transcriptions", async (req, res) => {
+router.get("/transcriptions", requireAuth, async (req, res) => {
   const { data, error } = await supabase
     .from("transcriptions")
     .select("*")
+    .eq("user_id", req.userId)
     .order("created_at", { ascending: false });
 
   if (error) {

@@ -1,7 +1,9 @@
 import { useState, useRef } from "react";
-import API from "../api";
+import API, { setAuthToken } from "../api";
+import { useAuth } from "@clerk/clerk-react";
 
 function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
+  const { getToken } = useAuth();
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const mediaRecorderRef = useRef(null);
@@ -28,6 +30,10 @@ function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         const formData = new FormData();
         formData.append("audio", blob, "recording.webm");
+
+        // Refresh token before request
+        const token = await getToken();
+        setAuthToken(token);
 
         setLoading(true);
         try {
