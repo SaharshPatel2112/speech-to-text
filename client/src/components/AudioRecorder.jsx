@@ -80,7 +80,7 @@ function AudioRecorder({ setTranscription, setLoading, setError, loading }) {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 hover:border-gray-600 transition">
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 hover:border-gray-600 transition">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-2 h-2 bg-red-500 rounded-full"></div>
         <h2 className="text-base font-semibold text-gray-200">Record Audio</h2>
