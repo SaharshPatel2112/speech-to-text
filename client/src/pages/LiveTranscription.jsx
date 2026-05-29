@@ -35,7 +35,8 @@ function LiveTranscription() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      const ws = new WebSocket("ws://localhost:5000/live");
+      const wsUrl = import.meta.env.VITE_WS_URL || "ws://localhost:5000/live";
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => console.log("WebSocket connected");
