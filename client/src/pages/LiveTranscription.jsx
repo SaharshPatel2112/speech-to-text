@@ -18,7 +18,7 @@ function LiveTranscription() {
     timerRef.current = setTimeout(() => {
       setLines((prev) => {
         if (prev.length === 0) return prev;
-        return prev.slice(1); // remove first line after 8 seconds
+        return prev.slice(1);
       });
       currentLineRef.current = "";
     }, 2500);
@@ -188,7 +188,7 @@ function LiveTranscription() {
             <span className="text-gray-500 text-sm">Session ended</span>
           )}
           {status === "idle" && (
-            <span className="text-gray-600 text-sm">Press start to begin</span>
+            <span className="text-gray-300 text-sm">Press start to begin</span>
           )}
         </div>
 
@@ -223,7 +223,7 @@ function LiveTranscription() {
 
         {error && (
           <div className="bg-red-950 border border-red-800 rounded-xl px-4 py-3 mb-5">
-            <p className="text-red-400 text-sm">{error}</p>
+            <p className="text-red-400 text-sm text-center">{error}</p>
           </div>
         )}
 
