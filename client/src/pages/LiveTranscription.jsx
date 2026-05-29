@@ -21,7 +21,7 @@ function LiveTranscription() {
         return prev.slice(1); // remove first line after 8 seconds
       });
       currentLineRef.current = "";
-    }, 4000);
+    }, 2500);
   };
 
   const startLive = async () => {
