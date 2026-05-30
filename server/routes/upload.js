@@ -5,6 +5,12 @@ const path = require("path");
 const deepgram = require("../deepgram");
 const supabase = require("../supabase");
 const router = express.Router();
+
+const uploadsDir = path.join(__dirname, "../uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const requireAuth = require("../middleware/requireAuth");
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
