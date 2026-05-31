@@ -4,8 +4,6 @@ function setupLiveTranscription(server) {
   const wss = new WebSocket.Server({ server, path: "/live" });
 
   wss.on("connection", (clientWs) => {
-    console.log("Client connected for live transcription");
-
     const deepgramWs = new WebSocket(
       "wss://api.deepgram.com/v1/listen?model=nova-2&punctuate=true&interim_results=true&utterance_end_ms=1000",
       {
@@ -16,7 +14,6 @@ function setupLiveTranscription(server) {
     );
 
     deepgramWs.on("open", () => {
-      console.log("Connected to Deepgram live API");
       clientWs.send(JSON.stringify({ type: "ready" }));
     });
 
@@ -46,9 +43,7 @@ function setupLiveTranscription(server) {
       );
     });
 
-    deepgramWs.on("close", () => {
-      console.log("Deepgram WS closed");
-    });
+    deepgramWs.on("close", () => {});
 
     clientWs.on("message", (audioChunk) => {
       if (deepgramWs.readyState === WebSocket.OPEN) {
@@ -57,7 +52,6 @@ function setupLiveTranscription(server) {
     });
 
     clientWs.on("close", () => {
-      console.log("Client disconnected");
       if (deepgramWs.readyState === WebSocket.OPEN) {
         deepgramWs.close();
       }
