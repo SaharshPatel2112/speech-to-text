@@ -28,7 +28,7 @@ function MainPage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between min-w-[250px]">
           <div className="flex items-center gap-2">
             <img src="/Logo.svg" alt="SpeechText" className="w-8 h-8" />
-            <span className="font-semibold text-lg">Speech2Text</span>
+            <span className="font-semibold text-lg">SpeechText</span>
           </div>
           <div className="flex items-center gap-4">
             <UserButton afterSignOutUrl="/" />
@@ -67,7 +67,9 @@ function MainPage() {
                   onClick={() => navigate("/live")}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition"
                 >
-                  <span className="text-white text-sm font-medium">Go to Live</span>
+                  <span className="text-white text-sm font-medium">
+                    Go to Live
+                  </span>
                   <svg
                     className="w-4 h-4 text-white"
                     fill="none"
